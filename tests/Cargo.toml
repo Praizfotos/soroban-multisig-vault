@@ -1,0 +1,21 @@
+[package]
+name = "integration-tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+soroban-sdk = "21.0.0"
+treasury = { path = "../contracts/treasury" }
+governance = { path = "../contracts/governance" }
+registry = { path = "../contracts/registry" }
+
+[dev-dependencies]
+soroban-sdk = { version = "21.0.0", features = ["testutils"] }
+
+[[test]]
+name = "integration_tests"
+path = "integration/full_flow.rs"
+
+[[test]]
+name = "security_tests"
+path = "security/security_suite.rs"

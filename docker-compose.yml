@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: soroban-multisig-db
+    environment:
+      POSTGRES_DB: soroban_multisig
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: soroban-multisig-backend
+    environment:
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: soroban_multisig
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      SOROBAN_NETWORK: ${SOROBAN_NETWORK:-testnet}
+      SOROBAN_RPC_URL: ${SOROBAN_RPC_URL:-https://soroban-testnet.stellar.org}
+      TREASURY_CONTRACT_ID: ${TREASURY_CONTRACT_ID}
+      ENABLE_INDEXER: ${ENABLE_INDEXER:-true}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./backend/logs:/app/logs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: soroban-multisig-frontend
+    environment:
+      NEXT_PUBLIC_SOROBAN_NETWORK: ${SOROBAN_NETWORK:-testnet}
+      NEXT_PUBLIC_TREASURY_CONTRACT_ID: ${TREASURY_CONTRACT_ID}
+      NEXT_PUBLIC_GOVERNANCE_CONTRACT_ID: ${GOVERNANCE_CONTRACT_ID}
+      NEXT_PUBLIC_REGISTRY_CONTRACT_ID: ${REGISTRY_CONTRACT_ID}
+      NEXT_PUBLIC_API_URL: http://backend:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: soroban-multisig-network
