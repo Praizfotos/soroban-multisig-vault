@@ -85,7 +85,7 @@ impl RegistryContract {
         let mut result = Vec::new(&env);
 
         for treasury_id in all_treasuries.iter() {
-            if let Some(info) = Self::get_treasury(env.clone(), treasury_id) {
+            if let Some(info) = Self::get_treasury(env.clone(), treasury_id.clone()) {
                 if info.creator == creator {
                     result.push_back(treasury_id);
                 }
