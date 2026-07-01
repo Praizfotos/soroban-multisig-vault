@@ -4,9 +4,7 @@ import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import { treasuryRoutes } from './routes/treasury';
 import { proposalRoutes } from './routes/proposal';
-import { voteRoutes } from './routes/vote';
-import { eventRoutes } from './routes/event';
-import { statsRoutes } from './routes/stats';
+import { voteRoutes, eventRoutes, statsRoutes } from './routes/index';
 import { errorHandler } from './middleware/errorHandler';
 import { startEventIndexer } from './services/indexer';
 
